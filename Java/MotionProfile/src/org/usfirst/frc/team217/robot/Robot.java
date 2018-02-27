@@ -36,10 +36,12 @@ import edu.wpi.first.wpilibj.Joystick;
 public class Robot extends IterativeRobot {
 
 	/** The Talon we want to motion profile. */
-	TalonSRX _talon = new TalonSRX(Constants.kTalonID);
+	TalonSRX leftTalonMaster = new TalonSRX(7);
+	TalonSRX leftTalonSlave1 = new TalonSRX(11);
+	TalonSRX leftTalonSlave2 = new TalonSRX(12);
 
 	/** some example logic on how one can manage an MP */
-	MotionProfileExample _example = new MotionProfileExample(_talon);
+	MotionProfileExample _example = new MotionProfileExample(leftTalonMaster);
 
 	/** joystick for testing */
 	Joystick _joy = new Joystick(0);
@@ -54,22 +56,25 @@ public class Robot extends IterativeRobot {
 	/** run once after booting/enter-disable */
 	public void disabledInit() {
 
-		_talon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
-		_talon.setSensorPhase(true); /* keep sensor and motor in phase */
-		_talon.configNeutralDeadband(Constants.kNeutralDeadband, Constants.kTimeoutMs);
+		leftTalonMaster.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
+		leftTalonMaster.setSensorPhase(false); /* keep sensor and motor in phase */
+		leftTalonMaster.configNeutralDeadband(Constants.kNeutralDeadband, Constants.kTimeoutMs);
 
-		_talon.config_kF(0, 0.076, Constants.kTimeoutMs);
-		_talon.config_kP(0, 2.000, Constants.kTimeoutMs);
-		_talon.config_kI(0, 0.0, Constants.kTimeoutMs);
-		_talon.config_kD(0, 20.0, Constants.kTimeoutMs);
+		leftTalonMaster.config_kF(0, 0.076, Constants.kTimeoutMs);
+		leftTalonMaster.config_kP(0, 2.000, Constants.kTimeoutMs);
+		leftTalonMaster.config_kI(0, 0.0, Constants.kTimeoutMs);
+		leftTalonMaster.config_kD(0, 20.0, Constants.kTimeoutMs);
 
 		/* Our profile uses 10ms timing */
-		_talon.configMotionProfileTrajectoryPeriod(10, Constants.kTimeoutMs); 
+		leftTalonMaster.configMotionProfileTrajectoryPeriod(10, Constants.kTimeoutMs); 
 		/*
 		 * status 10 provides the trajectory target for motion profile AND
 		 * motion magic
 		 */
-		_talon.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, Constants.kTimeoutMs);
+		leftTalonMaster.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, Constants.kTimeoutMs);
+		
+		leftTalonSlave1.set(ControlMode.Follower, 7);
+		leftTalonSlave2.set(ControlMode.Follower, 7);
 	}
 
 	/** function is called periodically during operator control */
@@ -90,14 +95,14 @@ public class Robot extends IterativeRobot {
 
 		/* Check button 5 (top left shoulder on the logitech gamead). */
 		if (btns[5] == false) {
-			/*
+			/* 
 			 * If it's not being pressed, just do a simple drive. This could be
 			 * a RobotDrive class or custom drivetrain logic. The point is we
 			 * want the switch in and out of MP Control mode.
 			 */
 
 			/* button5 is off so straight drive */
-			_talon.set(ControlMode.PercentOutput, leftYjoystick);
+			leftTalonMaster.set(ControlMode.PercentOutput, leftYjoystick);
 
 			_example.reset();
 		} else {
@@ -109,7 +114,7 @@ public class Robot extends IterativeRobot {
 
 			SetValueMotionProfile setOutput = _example.getSetValue();
 
-			_talon.set(ControlMode.MotionProfile, setOutput.value);
+			leftTalonMaster.set(ControlMode.MotionProfile, setOutput.value);
 
 			/*
 			 * if btn is pressed and was not pressed last time, In other words
@@ -138,7 +143,7 @@ public class Robot extends IterativeRobot {
 		 * doesn't just continue doing what it was doing before. BUT if that's
 		 * what the application/testing requires than modify this accordingly
 		 */
-		_talon.set(ControlMode.PercentOutput, 0);
+		leftTalonMaster.set(ControlMode.PercentOutput, 0);
 		/* clear our buffer and put everything into a known state */
 		_example.reset();
 	}
