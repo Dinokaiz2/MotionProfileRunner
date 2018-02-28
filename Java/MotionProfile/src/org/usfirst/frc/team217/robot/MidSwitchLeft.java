@@ -34,7 +34,7 @@ public class MidSwitchLeft extends Path {
     	// Max Acceleration:    2.0 m/s/s
     	// Max Jerk:            60.0 m/s/s/s
     	config = new Trajectory.Config(Trajectory.FitMethod.HERMITE_CUBIC,
-    			Trajectory.Config.SAMPLES_FAST, 0.05, 1.7, 0.5, 1);
+    			Trajectory.Config.SAMPLES_FAST, 0.05, 0.8, 1, 60.0);
     	
     	// Create waypoints (knots of the Hermite spline).
     	// First point is the starting position, last point is the end.
@@ -42,14 +42,14 @@ public class MidSwitchLeft extends Path {
     	// Positive Y is to the right, positive X is forward
     	// TODO: Not actually real points for MidSwitchLeft right now
     	points = new Waypoint[] {
-    			new Waypoint(-4, -1, Pathfinder.d2r(-45)),
-    			new Waypoint(-2, -2, 0),
-    			new Waypoint(0, 0, 0)
+    			new Waypoint(3.22, 13.23, 0),
+    			new Waypoint(6, 15, Pathfinder.d2r(45)),
+    			new Waypoint(11.67, 18.01, 0)
     	};
     	
     	trajectory = Pathfinder.generate(points, config);
-    	// Wheelbase Width (meters)
-    	modifier = new TankModifier(trajectory).modify(0.568452); // According to CAD
+    	// Wheelbase Width (feet)
+    	modifier = new TankModifier(trajectory).modify(1.865);
     	// Do something with the new Trajectories...
     	left = modifier.getLeftTrajectory();
     	right = modifier.getRightTrajectory();

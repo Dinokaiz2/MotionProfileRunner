@@ -67,7 +67,7 @@ public class Robot extends IterativeRobot {
 		leftTalonMaster.configNeutralDeadband(Constants.kNeutralDeadband, Constants.kTimeoutMs);
 
 		leftTalonMaster.config_kF(0, 0.076, Constants.kTimeoutMs);
-		leftTalonMaster.config_kP(0, 2.000, Constants.kTimeoutMs);
+		leftTalonMaster.config_kP(0, 0.5, Constants.kTimeoutMs);
 		leftTalonMaster.config_kI(0, 0.0, Constants.kTimeoutMs);
 		leftTalonMaster.config_kD(0, 20.0, Constants.kTimeoutMs);
 
@@ -91,12 +91,12 @@ public class Robot extends IterativeRobot {
 		rightTalonMaster.configNeutralDeadband(Constants.kNeutralDeadband, Constants.kTimeoutMs);
 
 		rightTalonMaster.config_kF(0, 0.076, Constants.kTimeoutMs);
-		rightTalonMaster.config_kP(0, 2.000, Constants.kTimeoutMs);
+		rightTalonMaster.config_kP(0, 0.5, Constants.kTimeoutMs);
 		rightTalonMaster.config_kI(0, 0.0, Constants.kTimeoutMs);
 		rightTalonMaster.config_kD(0, 20.0, Constants.kTimeoutMs);
 
 		/* Our profile uses 10ms timing */
-		rightTalonMaster.configMotionProfileTrajectoryPeriod(5, Constants.kTimeoutMs); 
+		rightTalonMaster.configMotionProfileTrajectoryPeriod(10, Constants.kTimeoutMs); 
 		/*
 		 * status 10 provides the trajectory target for motion profile AND
 		 * motion magic

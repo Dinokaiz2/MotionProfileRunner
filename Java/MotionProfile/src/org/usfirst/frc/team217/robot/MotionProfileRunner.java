@@ -50,7 +50,7 @@ public class MotionProfileRunner {
 	private double[][] rightArray;
 
 	/** Additional cache for holding the active trajectory point */
-	double leftPos = 0, leftVel = 0, leftHeading = 0, rightPos = 0, rightVel = 0, rightHeading = 0;;
+	double leftPos = 0, leftVel = 0, leftHeading = 0, rightPos = 0, rightVel = 0, rightHeading = 0;
 
 	/**
 	 * Reference to the talon we plan on manipulating. We will not changeMode()
@@ -90,7 +90,7 @@ public class MotionProfileRunner {
 	 * How many trajectory points do we wait for before firing the motion
 	 * profile.
 	 */
-	private static final int kMinPointsInTalon = 127;
+	private static final int kMinPointsInTalon = 50;
 	/**
 	 * Just a state timeout to make sure we don't get stuck anywhere. Each loop
 	 * is about 20ms.
@@ -333,7 +333,7 @@ public class MotionProfileRunner {
 			leftPoint.headingDeg = 0; /* future feature - not used in this example*/
 			leftPoint.profileSlotSelect0 = 0; /* which set of gains would you like to use [0,3]? */
 			leftPoint.profileSlotSelect1 = 0; /* future feature  - not used in this example - cascaded PID [0,1], leave zero */
-			leftPoint.timeDur = GetTrajectoryDuration((int)leftProfile[i][2]);
+			leftPoint.timeDur = GetTrajectoryDuration((int)(leftProfile[i][2] * 1000));
 			leftPoint.zeroPos = false;
 			if (i == 0)
 				leftPoint.zeroPos = true; /* set this to true on the first point */
