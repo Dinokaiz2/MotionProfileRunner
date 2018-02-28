@@ -39,9 +39,15 @@ public class Robot extends IterativeRobot {
 	TalonSRX leftTalonMaster = new TalonSRX(7);
 	TalonSRX leftTalonSlave1 = new TalonSRX(11);
 	TalonSRX leftTalonSlave2 = new TalonSRX(12);
+	
+	TalonSRX rightTalonMaster = new TalonSRX(8);
+	TalonSRX rightTalonSlave1 = new TalonSRX(9);
+	TalonSRX rightTalonSlave2 = new TalonSRX(10);
+	
+	public Path midSwitchLeft = new MidSwitchLeft();
 
 	/** some example logic on how one can manage an MP */
-	MotionProfileExample _example = new MotionProfileExample(leftTalonMaster);
+	MotionProfileRunner _example = new MotionProfileRunner(leftTalonMaster, rightTalonMaster, midSwitchLeft.getLeftArray(), midSwitchLeft.getRightArray());
 
 	/** joystick for testing */
 	Joystick _joy = new Joystick(0);
@@ -73,8 +79,32 @@ public class Robot extends IterativeRobot {
 		 */
 		leftTalonMaster.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, Constants.kTimeoutMs);
 		
+		leftTalonMaster.setInverted(true);
+		leftTalonSlave1.setInverted(true);
+		leftTalonSlave2.setInverted(true);
+		
 		leftTalonSlave1.set(ControlMode.Follower, 7);
 		leftTalonSlave2.set(ControlMode.Follower, 7);
+		
+		rightTalonMaster.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
+		rightTalonMaster.setSensorPhase(false); /* keep sensor and motor in phase */
+		rightTalonMaster.configNeutralDeadband(Constants.kNeutralDeadband, Constants.kTimeoutMs);
+
+		rightTalonMaster.config_kF(0, 0.076, Constants.kTimeoutMs);
+		rightTalonMaster.config_kP(0, 2.000, Constants.kTimeoutMs);
+		rightTalonMaster.config_kI(0, 0.0, Constants.kTimeoutMs);
+		rightTalonMaster.config_kD(0, 20.0, Constants.kTimeoutMs);
+
+		/* Our profile uses 10ms timing */
+		rightTalonMaster.configMotionProfileTrajectoryPeriod(5, Constants.kTimeoutMs); 
+		/*
+		 * status 10 provides the trajectory target for motion profile AND
+		 * motion magic
+		 */
+		rightTalonMaster.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, Constants.kTimeoutMs);
+		
+		rightTalonSlave1.set(ControlMode.Follower, 8);
+		rightTalonSlave2.set(ControlMode.Follower, 8);
 	}
 
 	/** function is called periodically during operator control */
@@ -86,11 +116,11 @@ public class Robot extends IterativeRobot {
 
 		/* get the left joystick axis on Logitech Gampead */
 		double leftYjoystick = -1 * _joy.getY(); /* multiple by -1 so joystick forward is positive */
+		double rightYjoystick = -1 * _joy.getRawAxis(5); /* multiple by -1 so joystick forward is positive */
 
 		/*
 		 * call this periodically, and catch the output. Only apply it if user
 		 * wants to run MP.
-		 */
 		_example.control();
 
 		/* Check button 5 (top left shoulder on the logitech gamead). */
@@ -103,6 +133,7 @@ public class Robot extends IterativeRobot {
 
 			/* button5 is off so straight drive */
 			leftTalonMaster.set(ControlMode.PercentOutput, leftYjoystick);
+			rightTalonMaster.set(ControlMode.PercentOutput, rightYjoystick);
 
 			_example.reset();
 		} else {
@@ -115,6 +146,7 @@ public class Robot extends IterativeRobot {
 			SetValueMotionProfile setOutput = _example.getSetValue();
 
 			leftTalonMaster.set(ControlMode.MotionProfile, setOutput.value);
+			rightTalonMaster.set(ControlMode.MotionProfile, setOutput.value);
 
 			/*
 			 * if btn is pressed and was not pressed last time, In other words
@@ -144,6 +176,7 @@ public class Robot extends IterativeRobot {
 		 * what the application/testing requires than modify this accordingly
 		 */
 		leftTalonMaster.set(ControlMode.PercentOutput, 0);
+		rightTalonMaster.set(ControlMode.PercentOutput, 0);
 		/* clear our buffer and put everything into a known state */
 		_example.reset();
 	}

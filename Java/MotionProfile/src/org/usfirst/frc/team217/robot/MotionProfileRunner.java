@@ -45,6 +45,9 @@ public class MotionProfileRunner {
 	 */
 	private MotionProfileStatus leftStatus = new MotionProfileStatus();
 	private MotionProfileStatus rightStatus = new MotionProfileStatus();
+	
+	private double[][] leftArray;
+	private double[][] rightArray;
 
 	/** Additional cache for holding the active trajectory point */
 	double leftPos = 0, leftVel = 0, leftHeading = 0, rightPos = 0, rightVel = 0, rightHeading = 0;;
@@ -87,7 +90,7 @@ public class MotionProfileRunner {
 	 * How many trajectory points do we wait for before firing the motion
 	 * profile.
 	 */
-	private static final int kMinPointsInTalon = 5;
+	private static final int kMinPointsInTalon = 127;
 	/**
 	 * Just a state timeout to make sure we don't get stuck anywhere. Each loop
 	 * is about 20ms.
@@ -118,16 +121,18 @@ public class MotionProfileRunner {
 	 * @param talon
 	 *            reference to Talon object to fetch motion profile status from.
 	 */
-	public MotionProfileRunner(TalonSRX leftTalon, TalonSRX rightTalon) {
+	public MotionProfileRunner(TalonSRX leftTalon, TalonSRX rightTalon, double[][] leftArray, double[][] rightArray) {
+		this.leftArray = leftArray;
+		this.rightArray = rightArray;
 		this.leftTalon = leftTalon;
 		this.rightTalon = rightTalon;
 		/*
 		 * since our MP is 10ms per point, set the control frame rate and the
 		 * notifer to half that
 		 */
-		leftTalon.changeMotionControlFramePeriod(5);
-		rightTalon.changeMotionControlFramePeriod(5);
-		notifer.startPeriodic(0.005);
+		leftTalon.changeMotionControlFramePeriod(1);
+		rightTalon.changeMotionControlFramePeriod(1);
+		notifer.startPeriodic(0.001);
 	}
 
 	/**
@@ -288,7 +293,7 @@ public class MotionProfileRunner {
 	/** Start filling the MPs to all of the involved Talons. */
 	private void startFilling() {
 		/* since this example only has one talon, just update that one */
-		startFilling(GeneratedMotionProfile.Points, GeneratedMotionProfile.Points, GeneratedMotionProfile.kNumPoints); // TODO
+		startFilling(leftArray, rightArray, leftArray.length);
 	}
 
 	private void startFilling(double[][] leftProfile, double[][] rightProfile, int totalCnt) {
@@ -323,8 +328,8 @@ public class MotionProfileRunner {
 			double leftPositionRot = leftProfile[i][0];
 			double leftVelocityRPM = leftProfile[i][1];
 			/* for each point, fill our structure and pass it to API */
-			leftPoint.position = leftPositionRot * Constants.kSensorUnitsPerRotation; //Convert Revolutions to Units
-			leftPoint.velocity = leftVelocityRPM * Constants.kSensorUnitsPerRotation / 600.0; //Convert RPM to Units/100ms
+			leftPoint.position = leftPositionRot * 4470; // Convert feet to Units
+			leftPoint.velocity = (leftVelocityRPM * 4470 / 600.0) * 0.454728; // Convert RPM to Units/100ms
 			leftPoint.headingDeg = 0; /* future feature - not used in this example*/
 			leftPoint.profileSlotSelect0 = 0; /* which set of gains would you like to use [0,3]? */
 			leftPoint.profileSlotSelect1 = 0; /* future feature  - not used in this example - cascaded PID [0,1], leave zero */
