@@ -120,7 +120,7 @@ public class Robot extends IterativeRobot {
 
 		/*
 		 * call this periodically, and catch the output. Only apply it if user
-		 * wants to run MP.
+		 * wants to run MP. */
 		_example.control();
 
 		/* Check button 5 (top left shoulder on the logitech gamead). */
