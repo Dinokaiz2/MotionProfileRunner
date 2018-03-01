@@ -33,11 +33,6 @@ import com.ctre.phoenix.motion.*;
 import com.ctre.phoenix.motion.TrajectoryPoint.TrajectoryDuration;
 
 public class MotionProfileRunner {
-	
-	// TODO: Get from RobotMap
-	public static final int LEFT_DRIVETRAIN_TALON = 0;
-	public static final int RIGHT_DRIVETRAIN_TALON = 1;
-
 	/**
 	 * The status of the motion profile executer and buffer inside the Talon.
 	 * Instead of creating a new one every time we call getMotionProfileStatus,
@@ -46,10 +41,11 @@ public class MotionProfileRunner {
 	private MotionProfileStatus leftStatus = new MotionProfileStatus();
 	private MotionProfileStatus rightStatus = new MotionProfileStatus();
 	
+	/** Arrays to hold the trajectories for each side. */
 	private double[][] leftArray;
 	private double[][] rightArray;
 
-	/** Additional cache for holding the active trajectory point */
+	/** Additional cache for holding the active trajectory points */
 	double leftPos = 0, leftVel = 0, leftHeading = 0, rightPos = 0, rightVel = 0, rightHeading = 0;
 
 	/**
@@ -114,7 +110,6 @@ public class MotionProfileRunner {
 	}
 	Notifier notifer = new Notifier(new PeriodicRunnable());
 	
-
 	/**
 	 * C'tor
 	 * 
