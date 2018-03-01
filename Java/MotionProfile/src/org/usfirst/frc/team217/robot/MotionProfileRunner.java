@@ -33,6 +33,10 @@ import com.ctre.phoenix.motion.*;
 import com.ctre.phoenix.motion.TrajectoryPoint.TrajectoryDuration;
 
 public class MotionProfileRunner {
+	
+	public static final double WHEEL_DIAMETER = 3.5; // inches
+	public static final int UNITS_PER_REVOLUTION = 4096;
+	
 	/**
 	 * The status of the motion profile executer and buffer inside the Talon.
 	 * Instead of creating a new one every time we call getMotionProfileStatus,
@@ -320,11 +324,24 @@ public class MotionProfileRunner {
 		
 		/* This is fast since it's just into our TOP buffer */
 		for (int i = 0; i < totalCnt; ++i) {
-			double leftPositionRot = leftProfile[i][0];
-			double leftVelocityRPM = leftProfile[i][1];
+			double leftPositionRaw = leftProfile[i][0];
+			double leftVelocityRaw = leftProfile[i][1];
 			/* for each point, fill our structure and pass it to API */
-			leftPoint.position = leftPositionRot * 4470; // Convert feet to Units
-			leftPoint.velocity = (leftVelocityRPM * 4470 / 600.0) * 0.454728; // Convert RPM to Units/100ms
+			
+			// leftPositionRaw is in feet, must change to Units
+			leftPositionRaw *= 12; // inches
+			leftPositionRaw /= WHEEL_DIAMETER * Math.PI; // revolutions
+			leftPositionRaw *= UNITS_PER_REVOLUTION; // Units (multiplier was previously 4470)
+			
+			// leftVelocityRaw is in ft/sec (TODO: Confirm?), must change to Units/100ms
+			leftVelocityRaw /= 10; // ft/100ms
+			leftVelocityRaw *= 12; // in/100ms
+			leftVelocityRaw /= WHEEL_DIAMETER * Math.PI; // revolutions/100ms
+			leftVelocityRaw *= UNITS_PER_REVOLUTION; // Units/100ms (multiplier was previously 4470/600*0.454728)
+			
+			leftPoint.position = leftPositionRaw;
+			leftPoint.velocity = leftVelocityRaw;
+			
 			leftPoint.headingDeg = 0; /* future feature - not used in this example*/
 			leftPoint.profileSlotSelect0 = 0; /* which set of gains would you like to use [0,3]? */
 			leftPoint.profileSlotSelect1 = 0; /* future feature  - not used in this example - cascaded PID [0,1], leave zero */
@@ -339,11 +356,24 @@ public class MotionProfileRunner {
 
 			leftTalon.pushMotionProfileTrajectory(leftPoint);
 			
-			double rightPositionRot = rightProfile[i][0];
-			double rightVelocityRPM = rightProfile[i][1];
+			double rightPositionRaw = rightProfile[i][0]; // feet
+			double rightVelocityRaw = rightProfile[i][1]; // ft/sec
 			/* for each point, fill our structure and pass it to API */
-			rightPoint.position = rightPositionRot * Constants.kSensorUnitsPerRotation; //Convert Revolutions to Units
-			rightPoint.velocity = rightVelocityRPM * Constants.kSensorUnitsPerRotation / 600.0; //Convert RPM to Units/100ms
+			
+			// rightPositionRaw is in feet, must change to Units
+			rightPositionRaw *= 12; // inches
+			rightPositionRaw /= WHEEL_DIAMETER * Math.PI; // revolutions
+			rightPositionRaw *= UNITS_PER_REVOLUTION; // Units (multiplier was previously 4470)
+			
+			// rightVelocityRaw is in ft/sec (TODO: Confirm?), must change to Units/100ms
+			rightVelocityRaw /= 10; // ft/100ms
+			rightVelocityRaw *= 12; // in/100ms
+			rightVelocityRaw /= WHEEL_DIAMETER * Math.PI; // revolutions/100ms
+			rightVelocityRaw *= UNITS_PER_REVOLUTION; // Units/100ms (multiplier was previously 4470/600*0.454728)
+			
+			rightPoint.position = rightPositionRaw;
+			rightPoint.velocity = rightVelocityRaw;
+			
 			rightPoint.headingDeg = 0; /* future feature - not used in this example*/
 			rightPoint.profileSlotSelect0 = 0; /* which set of gains would you like to use [0,3]? */
 			rightPoint.profileSlotSelect1 = 0; /* future feature  - not used in this example - cascaded PID [0,1], leave zero */
