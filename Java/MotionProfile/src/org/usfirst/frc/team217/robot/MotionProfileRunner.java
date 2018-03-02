@@ -330,9 +330,6 @@ public class MotionProfileRunner {
 			
 			leftPoint.position = ft2Units(leftPositionRaw);
 			leftPoint.velocity = fps2UnitsPerRev(leftVelocityRaw);
-			leftPoint.headingDeg = 0; /* future feature - not used in this example*/
-			leftPoint.profileSlotSelect0 = 0; /* which set of gains would you like to use [0,3]? */
-			leftPoint.profileSlotSelect1 = 0; /* future feature  - not used in this example - cascaded PID [0,1], leave zero */
 			leftPoint.timeDur = GetTrajectoryDuration((int)(leftProfile[i][2] * 1000));
 			leftPoint.zeroPos = false;
 			if (i == 0)
@@ -350,9 +347,6 @@ public class MotionProfileRunner {
 			
 			rightPoint.position = ft2Units(rightPositionRaw);
 			rightPoint.velocity = fps2UnitsPerRev(rightVelocityRaw);
-			rightPoint.headingDeg = 0; /* future feature - not used in this example*/
-			rightPoint.profileSlotSelect0 = 0; /* which set of gains would you like to use [0,3]? */
-			rightPoint.profileSlotSelect1 = 0; /* future feature  - not used in this example - cascaded PID [0,1], leave zero */
 			rightPoint.timeDur = GetTrajectoryDuration((int)rightProfile[i][2]);
 			rightPoint.zeroPos = false;
 			if (i == 0)
