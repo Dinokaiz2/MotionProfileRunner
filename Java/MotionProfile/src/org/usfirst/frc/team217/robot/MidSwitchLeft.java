@@ -42,9 +42,11 @@ public class MidSwitchLeft extends Path {
     	// Positive Y is to the right, positive X is forward
     	// TODO: Not actually real points for MidSwitchLeft right now
     	points = new Waypoint[] {
-    			new Waypoint(3.22, 13.23, 0),
-    			new Waypoint(6, 15, Pathfinder.d2r(45)),
-    			new Waypoint(11.67, 18.01, 0)
+//    			new Waypoint(3.22, 13.23, 0),
+//    			new Waypoint(6, 15, Pathfinder.d2r(45)),
+//    			new Waypoint(11.67, 18.01, 0)
+    			new Waypoint(0, 0, 0),
+    			new Waypoint(100, 0, 0)
     	};
     	
     	trajectory = Pathfinder.generate(points, config);
@@ -53,15 +55,15 @@ public class MidSwitchLeft extends Path {
     	// Do something with the new Trajectories...
     	left = modifier.getLeftTrajectory();
     	right = modifier.getRightTrajectory();
-    	leftArray = new double[left.length()][2];
-    	for (int i = 0; i < left.length(); i++) {
-    		Trajectory.Segment seg = left.get(i);
+    	leftArray = new double[trajectory.length()][2];
+    	for (int i = 0; i < trajectory.length(); i++) {
+    		Trajectory.Segment seg = trajectory.get(i);
     		double[] point = {seg.position, seg.velocity, seg.dt};
     		leftArray[i] = point;
     	}
-    	rightArray = new double[right.length()][2];
-    	for (int i = 0; i < right.length(); i++) {
-    		Trajectory.Segment seg = right.get(i);
+    	rightArray = new double[trajectory.length()][2];
+    	for (int i = 0; i < trajectory.length(); i++) {
+    		Trajectory.Segment seg = trajectory.get(i);
     		double[] point = {seg.position, seg.velocity, seg.dt};
     		rightArray[i] = point;
     	}

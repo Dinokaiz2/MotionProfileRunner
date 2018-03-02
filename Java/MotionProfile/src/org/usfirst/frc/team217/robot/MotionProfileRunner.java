@@ -35,7 +35,7 @@ import com.ctre.phoenix.motion.TrajectoryPoint.TrajectoryDuration;
 public class MotionProfileRunner {
 	
 	public static final double WHEEL_DIAMETER = 3.5; // inches
-	public static final int UNITS_PER_REVOLUTION = 4096;
+	public static final int UNITS_PER_REVOLUTION = 4096; // encoder ticks
 	
 	/**
 	 * The status of the motion profile executer and buffer inside the Talon.
@@ -324,24 +324,12 @@ public class MotionProfileRunner {
 		
 		/* This is fast since it's just into our TOP buffer */
 		for (int i = 0; i < totalCnt; ++i) {
-			double leftPositionRaw = leftProfile[i][0];
-			double leftVelocityRaw = leftProfile[i][1];
+			double leftPositionRaw = leftProfile[i][0]; // ft
+			double leftVelocityRaw = leftProfile[i][1]; // ft/sec
 			/* for each point, fill our structure and pass it to API */
 			
-			// leftPositionRaw is in feet, must change to Units
-			leftPositionRaw *= 12; // inches
-			leftPositionRaw /= WHEEL_DIAMETER * Math.PI; // revolutions
-			leftPositionRaw *= UNITS_PER_REVOLUTION; // Units (multiplier was previously 4470)
-			
-			// leftVelocityRaw is in ft/sec (TODO: Confirm?), must change to Units/100ms
-			leftVelocityRaw /= 10; // ft/100ms
-			leftVelocityRaw *= 12; // in/100ms
-			leftVelocityRaw /= WHEEL_DIAMETER * Math.PI; // revolutions/100ms
-			leftVelocityRaw *= UNITS_PER_REVOLUTION; // Units/100ms (multiplier was previously 4470/600*0.454728)
-			
-			leftPoint.position = leftPositionRaw;
-			leftPoint.velocity = leftVelocityRaw;
-			
+			leftPoint.position = ft2Units(leftPositionRaw);
+			leftPoint.velocity = fps2UnitsPerRev(leftVelocityRaw);
 			leftPoint.headingDeg = 0; /* future feature - not used in this example*/
 			leftPoint.profileSlotSelect0 = 0; /* which set of gains would you like to use [0,3]? */
 			leftPoint.profileSlotSelect1 = 0; /* future feature  - not used in this example - cascaded PID [0,1], leave zero */
@@ -356,24 +344,12 @@ public class MotionProfileRunner {
 
 			leftTalon.pushMotionProfileTrajectory(leftPoint);
 			
-			double rightPositionRaw = rightProfile[i][0]; // feet
+			double rightPositionRaw = rightProfile[i][0]; // ft
 			double rightVelocityRaw = rightProfile[i][1]; // ft/sec
 			/* for each point, fill our structure and pass it to API */
 			
-			// rightPositionRaw is in feet, must change to Units
-			rightPositionRaw *= 12; // inches
-			rightPositionRaw /= WHEEL_DIAMETER * Math.PI; // revolutions
-			rightPositionRaw *= UNITS_PER_REVOLUTION; // Units (multiplier was previously 4470)
-			
-			// rightVelocityRaw is in ft/sec (TODO: Confirm?), must change to Units/100ms
-			rightVelocityRaw /= 10; // ft/100ms
-			rightVelocityRaw *= 12; // in/100ms
-			rightVelocityRaw /= WHEEL_DIAMETER * Math.PI; // revolutions/100ms
-			rightVelocityRaw *= UNITS_PER_REVOLUTION; // Units/100ms (multiplier was previously 4470/600*0.454728)
-			
-			rightPoint.position = rightPositionRaw;
-			rightPoint.velocity = rightVelocityRaw;
-			
+			rightPoint.position = ft2Units(rightPositionRaw);
+			rightPoint.velocity = fps2UnitsPerRev(rightVelocityRaw);
 			rightPoint.headingDeg = 0; /* future feature - not used in this example*/
 			rightPoint.profileSlotSelect0 = 0; /* which set of gains would you like to use [0,3]? */
 			rightPoint.profileSlotSelect1 = 0; /* future feature  - not used in this example - cascaded PID [0,1], leave zero */
@@ -405,5 +381,32 @@ public class MotionProfileRunner {
 	 */
 	SetValueMotionProfile getSetValue() {
 		return setValue;
+	}
+	
+	/**
+	 * Converts feet to encoder units.
+	 * Uses {@value #WHEEL_DIAMETER}" for wheel diameter and {@value #UNITS_PER_REVOLUTION} for encoder units per revolution.
+	 * @param feet
+	 * @return encoder units
+	 */
+	double ft2Units(double feet) {
+		feet *= 12; // inches
+		feet /= WHEEL_DIAMETER * Math.PI; // revolutions
+		feet *= UNITS_PER_REVOLUTION; // Units
+		return feet;
+	}
+	
+	/**
+	 * Converts feet per second to encoder units per 100 milliseconds.
+	 * Uses {@value #WHEEL_DIAMETER}" for wheel diameter and {@value #UNITS_PER_REVOLUTION} for encoder units per revolution.
+	 * @param fps feet per second
+	 * @return encoder units per 100 milliseconds
+	 */
+	double fps2UnitsPerRev(double fps) {
+		fps /= 10; // ft/100ms
+		fps *= 12; // in/100ms
+		fps /= WHEEL_DIAMETER * Math.PI; // revolutions/100ms
+		fps *= UNITS_PER_REVOLUTION; // Units/100ms
+		return fps;
 	}
 }

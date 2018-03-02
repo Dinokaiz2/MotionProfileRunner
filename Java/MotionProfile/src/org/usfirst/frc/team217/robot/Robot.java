@@ -28,21 +28,23 @@
 package org.usfirst.frc.team217.robot;
 
 import com.ctre.phoenix.motorcontrol.can.*;
+
 import com.ctre.phoenix.motion.*;
 import com.ctre.phoenix.motorcontrol.*;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobot {
 
 	/** The Talon we want to motion profile. */
-	TalonSRX leftTalonMaster = new TalonSRX(7);
-	TalonSRX leftTalonSlave1 = new TalonSRX(11);
-	TalonSRX leftTalonSlave2 = new TalonSRX(12);
+	TalonSRX leftTalonMaster = new TalonSRX(2);
+	//TalonSRX leftTalonSlave1 = new TalonSRX(11);
+	//TalonSRX leftTalonSlave2 = new TalonSRX(12);
 	
-	TalonSRX rightTalonMaster = new TalonSRX(8);
-	TalonSRX rightTalonSlave1 = new TalonSRX(9);
-	TalonSRX rightTalonSlave2 = new TalonSRX(10);
+	TalonSRX rightTalonMaster = new TalonSRX(1);
+	//TalonSRX rightTalonSlave1 = new TalonSRX(9);
+	//TalonSRX rightTalonSlave2 = new TalonSRX(10);
 	
 	public Path midSwitchLeft = new MidSwitchLeft();
 
@@ -66,13 +68,13 @@ public class Robot extends IterativeRobot {
 		leftTalonMaster.setSensorPhase(false); /* keep sensor and motor in phase */
 		leftTalonMaster.configNeutralDeadband(Constants.kNeutralDeadband, Constants.kTimeoutMs);
 
-		leftTalonMaster.config_kF(0, 0.076, Constants.kTimeoutMs);
-		leftTalonMaster.config_kP(0, 0.5, Constants.kTimeoutMs);
-		leftTalonMaster.config_kI(0, 0.0, Constants.kTimeoutMs);
-		leftTalonMaster.config_kD(0, 20.0, Constants.kTimeoutMs);
+		leftTalonMaster.config_kF(0, 0.076, Constants.kTimeoutMs); // 0.255
+		leftTalonMaster.config_kP(0, 0.5, Constants.kTimeoutMs); // 5
+		leftTalonMaster.config_kI(0, 0.0, Constants.kTimeoutMs); // 0
+		leftTalonMaster.config_kD(0, 20.0, Constants.kTimeoutMs); // 1
 
 		/* Our profile uses 10ms timing */
-		leftTalonMaster.configMotionProfileTrajectoryPeriod(10, Constants.kTimeoutMs); 
+		leftTalonMaster.configMotionProfileTrajectoryPeriod(0, Constants.kTimeoutMs); 
 		/*
 		 * status 10 provides the trajectory target for motion profile AND
 		 * motion magic
@@ -80,11 +82,11 @@ public class Robot extends IterativeRobot {
 		leftTalonMaster.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, Constants.kTimeoutMs);
 		
 		leftTalonMaster.setInverted(true);
-		leftTalonSlave1.setInverted(true);
-		leftTalonSlave2.setInverted(true);
+		//leftTalonSlave1.setInverted(true);
+		//leftTalonSlave2.setInverted(true);
 		
-		leftTalonSlave1.set(ControlMode.Follower, 7);
-		leftTalonSlave2.set(ControlMode.Follower, 7);
+		//leftTalonSlave1.set(ControlMode.Follower, 7);
+		//leftTalonSlave2.set(ControlMode.Follower, 7);
 		
 		rightTalonMaster.configSelectedFeedbackSensor(FeedbackDevice.QuadEncoder, 0, 10);
 		rightTalonMaster.setSensorPhase(false); /* keep sensor and motor in phase */
@@ -96,19 +98,20 @@ public class Robot extends IterativeRobot {
 		rightTalonMaster.config_kD(0, 20.0, Constants.kTimeoutMs);
 
 		/* Our profile uses 10ms timing */
-		rightTalonMaster.configMotionProfileTrajectoryPeriod(10, Constants.kTimeoutMs); 
+		rightTalonMaster.configMotionProfileTrajectoryPeriod(0, Constants.kTimeoutMs); 
 		/*
 		 * status 10 provides the trajectory target for motion profile AND
 		 * motion magic
 		 */
 		rightTalonMaster.setStatusFramePeriod(StatusFrameEnhanced.Status_10_MotionMagic, 10, Constants.kTimeoutMs);
 		
-		rightTalonSlave1.set(ControlMode.Follower, 8);
-		rightTalonSlave2.set(ControlMode.Follower, 8);
+		//rightTalonSlave1.set(ControlMode.Follower, 8);
+		//rightTalonSlave2.set(ControlMode.Follower, 8);
 	}
 
 	/** function is called periodically during operator control */
 	public void teleopPeriodic() {
+		
 		/* get buttons */
 		boolean[] btns = new boolean[_btnsLast.length];
 		for (int i = 1; i < _btnsLast.length; ++i)
@@ -117,6 +120,8 @@ public class Robot extends IterativeRobot {
 		/* get the left joystick axis on Logitech Gampead */
 		double leftYjoystick = -1 * _joy.getY(); /* multiple by -1 so joystick forward is positive */
 		double rightYjoystick = -1 * _joy.getRawAxis(5); /* multiple by -1 so joystick forward is positive */
+		double signedLeft = leftYjoystick;
+		double signedRight = rightYjoystick;
 
 		/*
 		 * call this periodically, and catch the output. Only apply it if user
@@ -133,7 +138,9 @@ public class Robot extends IterativeRobot {
 
 			/* button5 is off so straight drive */
 			leftTalonMaster.set(ControlMode.PercentOutput, leftYjoystick);
+			System.out.println(leftYjoystick);
 			rightTalonMaster.set(ControlMode.PercentOutput, rightYjoystick);
+			System.out.println(rightYjoystick);
 
 			_example.reset();
 		} else {
@@ -165,6 +172,12 @@ public class Robot extends IterativeRobot {
 		for (int i = 1; i < 10; ++i)
 			_btnsLast[i] = btns[i];
 
+		
+		SmartDashboard.putNumber("Left Speed", leftTalonMaster.getSelectedSensorVelocity(0));
+		SmartDashboard.putNumber("Right Speed", rightTalonMaster.getSelectedSensorVelocity(0));
+		SmartDashboard.putNumber("Left Pos", leftTalonMaster.getSelectedSensorPosition(0));
+		SmartDashboard.putNumber("Right Pos", rightTalonMaster.getSelectedSensorPosition(0));
+		
 	}
 
 	/** function is called periodically during disable */
@@ -177,7 +190,15 @@ public class Robot extends IterativeRobot {
 		 */
 		leftTalonMaster.set(ControlMode.PercentOutput, 0);
 		rightTalonMaster.set(ControlMode.PercentOutput, 0);
+		
+		SmartDashboard.putNumber("Left Speed", leftTalonMaster.getSelectedSensorVelocity(0));
+		SmartDashboard.putNumber("Right Speed", rightTalonMaster.getSelectedSensorVelocity(0));
+		SmartDashboard.putNumber("Left Pos", leftTalonMaster.getSelectedSensorPosition(0));
+		SmartDashboard.putNumber("Right Pos", rightTalonMaster.getSelectedSensorPosition(0));
+		
 		/* clear our buffer and put everything into a known state */
 		_example.reset();
+		
+		
 	}
 }
